@@ -1,39 +1,44 @@
 const { dbName } = require('./../_config/db');
 
 module.exports = (app, client) => {
-    app.put('/recipes/:id', async (req, mainResult) => {
-        const id = req.params.id;
-        const details = { id };
-        
-        const recipe = { ...req.body };
+  app.put('/recipes/:id', async (req, mainResult) => {
+    const { id } = req.params;
+    const details = { id };
 
-        const db = client.db(dbName);
+    const recipe = { ...req.body };
 
-        db.collection('recipes').findOne(details, (error, result) => {
-            if (error) {
-                mainResult.send(error);
-            }   else {
-                const { _id, dateAdded, ...rest } = result;
-                
-                updateRecipe(db, result, mainResult, {...result, ...recipe});
-                moveRecipeToHistory(db, mainResult, {...rest, dateEdited: new Date().toISOString()});
-            }
+    const db = client.db(dbName);
+
+    db.collection('recipes').findOne(details, (error, result) => {
+      if (error) {
+        mainResult.send(error);
+      } else {
+        const { _id, dateAdded, ...rest } = result;
+
+        updateRecipe(db, result, mainResult, { ...result, ...recipe });
+        moveRecipeToHistory(db, mainResult, {
+          ...rest,
+          dateEdited: new Date().toISOString(),
         });
-    })
-}
+      }
+    });
+  });
+};
 
 function updateRecipe(db, details, mainResult, recipe) {
-    db.collection('recipes').update(details, recipe, (error, result) => {
-        if (error) {
-            mainResult.send({ error });
-        }   else {
-            mainResult.send(recipe);
-        }
-    });
+  db.collection('recipes').update(details, recipe, error => {
+    if (error) {
+      mainResult.send({ error });
+    } else {
+      mainResult.send(recipe);
+    }
+  });
 }
 
 function moveRecipeToHistory(db, mainResult, recipe) {
-    db.collection('history').insert(recipe, (error, result) => {
-        if (error) { mainResult.send({ error }); }
-    });
+  db.collection('history').insert(recipe, error => {
+    if (error) {
+      mainResult.send({ error });
+    }
+  });
 }
