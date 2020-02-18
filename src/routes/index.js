@@ -3,9 +3,9 @@
 const usersRoute = require('./users');
 // const getRecipeHistoryRoute = require("./get-recipe-history");
 
-module.exports = (app, db) => {
+module.exports = app => {
   //   addRecipeRoute(app, db);
   //   editRecipeRoute(app, db);
-  usersRoute(app, db);
+  usersRoute(app);
   //   getRecipeHistoryRoute(app, db);
 };

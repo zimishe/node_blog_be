@@ -28,7 +28,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
   app.listen(port, () => {
     // eslint-disable-next-line global-require
-    require('./routes')(app, db);
+    require('./routes')(app);
     console.log('Server is live at ', port);
   });
 });
