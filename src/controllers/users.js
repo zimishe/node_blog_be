@@ -1,7 +1,10 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const parseValidationErrors = require('../utils/validation');
+
+const PRIVATE_KEY = 'not_so_private';
 
 const createUser = async (req, res) => {
   const db = mongoose.connection;
@@ -48,7 +51,13 @@ const loginUser = async (req, res) => {
   const match = await bcrypt.compare(password, dbPasswordHash);
 
   if (match) {
-    res.status(200).send('hey there');
+    jwt.sign({ email, password }, PRIVATE_KEY, (err, token) => {
+      if (err) {
+        res.status(401).send('sorry');
+      } else {
+        res.status(200).send({ message: 'logged in successfully', token });
+      }
+    });
   } else {
     res.status(401).send('sorry');
   }
