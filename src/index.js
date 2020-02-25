@@ -1,8 +1,12 @@
+const dotenv = require('dotenv');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
+
+dotenv.config();
 const { URL } = require('./_config/db');
+const { checkToken } = require('./utils/checkToken');
 
 const port = process.env.PORT || 8000;
 
@@ -17,6 +21,8 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
+
+app.use(checkToken);
 
 mongoose.connect(URL, {
   useNewUrlParser: true,

@@ -4,8 +4,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const parseValidationErrors = require('../utils/validation');
 
-const PRIVATE_KEY = 'not_so_private';
-
 const createUser = async (req, res) => {
   const db = mongoose.connection;
   const { password, email, ...rest } = req.body;
@@ -51,7 +49,7 @@ const loginUser = async (req, res) => {
   const match = await bcrypt.compare(password, dbPasswordHash);
 
   if (match) {
-    jwt.sign({ email, password }, PRIVATE_KEY, (err, token) => {
+    jwt.sign({ email, password }, process.env.PRIVATE_KEY, (err, token) => {
       if (err) {
         res.status(401).send('sorry');
       } else {
@@ -63,7 +61,20 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getUsers = async (req, res) => {
+  const db = mongoose.connection;
+
+  db.collection('users').find().toArray((error, result) => {
+    if (error) {
+      res.send({ error });
+    } else {
+      res.send(result);
+    }
+  });
+};
+
 module.exports = {
   createUser,
   loginUser,
+  getUsers,
 };
