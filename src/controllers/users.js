@@ -16,6 +16,7 @@ const createUser = async (req, res) => {
 
   const user = new User(userData);
 
+  // TODO: get rid of db. usage here
   const userExists = await db.collection('users').findOne({
     email,
   });
@@ -38,6 +39,7 @@ const loginUser = async (req, res) => {
   const db = mongoose.connection;
   const { password, email } = req.body;
 
+  // TODO: get rid of db. usage here
   const userEntity = await db.collection('users').findOne({
     email,
   });
@@ -61,20 +63,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-const getUsers = async (req, res) => {
-  const db = mongoose.connection;
-
-  db.collection('users').find().toArray((error, result) => {
-    if (error) {
-      res.send({ error });
-    } else {
-      res.send(result);
-    }
-  });
-};
-
 module.exports = {
   createUser,
   loginUser,
-  getUsers,
 };

@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const checkToken = async (req, res, next) => {
   const { authorization } = req.headers;
   const { url } = req;
-  console.log('env', process.env.PRIVATE_KEY);
 
   if (url === '/login' || url === '/sign_up') {
     next();
