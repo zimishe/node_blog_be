@@ -1,4 +1,5 @@
 const dotenv = require('dotenv');
+const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -11,16 +12,16 @@ const { checkToken } = require('./utils/checkToken');
 const port = process.env.PORT || 8000;
 
 const app = express();
+app.use(cors({
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  origin: '*',
+  methods: 'GET, PUT, POST, DELETE',
+  preflightContinue: false,
+}));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
 
 app.use(checkToken);
 
