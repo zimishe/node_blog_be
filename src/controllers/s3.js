@@ -11,7 +11,7 @@ const getSignedUrl = async (req, res) => {
   const s3Params = {
     Bucket: S3_BUCKET,
     Key: fileName,
-    Expires: 60,
+    Expires: 360,
     ContentType: fileType,
     ACL: 'public-read',
   };
