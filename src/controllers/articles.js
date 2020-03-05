@@ -3,10 +3,8 @@ const Article = require('../models/Article');
 const parseValidationErrors = require('../utils/validation');
 
 const createArticle = async (req, res) => {
-  const { title, text } = req.body;
   const articleData = {
-    title,
-    text,
+    ...req.body,
     id: uuidv1(),
   };
 

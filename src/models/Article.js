@@ -10,6 +10,10 @@ const ArticleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    coverImageUrl: {
+      type: String,
+      required: true,
+    },
     text: { type: String, required: [true, "can't be blank"] },
   },
   { timestamps: true },
