@@ -5,7 +5,8 @@ const Article = require('../models/Article');
 const parseValidationErrors = require('../utils/validation');
 
 const createArticleComment = async (req, res) => {
-  const { author = {}, articleId } = req.body;
+  const { author = {} } = req.body;
+  const { articleId } = req.params;
 
   const [user, article] = await Promise.all([
     User.findOne({ id: author.id }),
@@ -19,6 +20,7 @@ const createArticleComment = async (req, res) => {
   } else {
     const commentData = {
       ...req.body,
+      articleId,
       author: {
         id: user.id,
         name: user.name,
