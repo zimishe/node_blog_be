@@ -4,9 +4,8 @@ const User = require('../models/User');
 const Article = require('../models/Article');
 const parseValidationErrors = require('../utils/validation');
 
-const createComment = async (req, res) => {
+const createArticleComment = async (req, res) => {
   const { author = {}, articleId } = req.body;
-
 
   const [user, article] = await Promise.all([
     User.findOne({ id: author.id }),
@@ -40,15 +39,22 @@ const createComment = async (req, res) => {
   }
 };
 
-// const getArticles = async (req, res) => {
-//   try {
-//     const articles = await Article.find({});
-//     res.send(articles);
-//   } catch (error) {
-//     res.status(422).send({ error });
-//   }
-// };
+const getArticleComments = async (req, res) => {
+  try {
+    const { page = 1, per_page = 10 } = req.body;
+
+    const comments = await Comment
+      .find({ ...req.params, ...req.query })
+      // eslint-disable-next-line camelcase
+      .skip(parseInt(page - 1, 10) * per_page)
+      .limit(parseInt(per_page, 10));
+    res.send(comments);
+  } catch (error) {
+    res.status(422).send({ error });
+  }
+};
 
 module.exports = {
-  createComment,
+  createArticleComment,
+  getArticleComments,
 };

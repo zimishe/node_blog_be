@@ -38,8 +38,23 @@ const getArticles = async (req, res) => {
   }
 };
 
+const getArticle = async (req, res) => {
+  try {
+    const article = await Article.find(req.params);
+
+    if (article) {
+      res.send(article);
+    } else {
+      res.status(404).send('Article not found');
+    }
+  } catch (error) {
+    res.status(422).send({ error });
+  }
+};
+
 module.exports = {
   createArticle,
   editArticle,
   getArticles,
+  getArticle,
 };
