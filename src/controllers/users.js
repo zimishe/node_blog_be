@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const uuidv1 = require('uuid/v1');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -12,6 +13,7 @@ const createUser = async (req, res) => {
     ...rest,
     email,
     password: bcrypt.hashSync(password, 5),
+    id: uuidv1(),
   };
 
   const user = new User(userData);
