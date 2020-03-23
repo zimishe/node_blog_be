@@ -19,6 +19,7 @@ app.use(cors({
   methods: 'GET, PUT, POST, DELETE',
   preflightContinue: false,
 }));
+app.use(express.static('public'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

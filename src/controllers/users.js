@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const parseValidationErrors = require('../utils/validation');
+const { sendEmail } = require('../utils/emails');
 
 const createUser = async (req, res) => {
   const db = mongoose.connection;
@@ -25,13 +26,14 @@ const createUser = async (req, res) => {
 
   userExists
     ? res.status(422).send({ email: 'already exists' })
-    : user.save(err => {
+    : user.save(async err => {
       if (err) {
         const { errors } = err;
         const errorsArray = parseValidationErrors(errors);
         res.status(422).send(errorsArray);
       } else {
         res.status(200).send('user registration succeed');
+        await sendEmail(user);
       }
     });
 };
