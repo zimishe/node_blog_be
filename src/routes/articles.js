@@ -1,5 +1,5 @@
 const {
-  createArticle, editArticle, getArticles, getArticle,
+  createArticle, editArticle, getArticles, getArticle, getArticleReport,
 } = require('../controllers/articles');
 
 module.exports = app => {
@@ -7,4 +7,5 @@ module.exports = app => {
   app.put('/articles/:id', editArticle);
   app.get('/articles', getArticles);
   app.get('/articles/:id', getArticle);
+  app.get('/articles/:id/report', getArticleReport);
 };

@@ -15,6 +15,10 @@ const ArticleSchema = new mongoose.Schema(
       required: true,
     },
     text: { type: String, required: [true, "can't be blank"] },
+    author: {
+      name: String,
+      id: String,
+    },
   },
   { timestamps: true },
 );

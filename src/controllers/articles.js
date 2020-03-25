@@ -1,6 +1,13 @@
+const fs = require('fs');
 const uuidv1 = require('uuid/v1');
+const pug = require('pug');
+const pdf = require('html-pdf');
 const Article = require('../models/Article');
+const User = require('../models/User');
+const Comment = require('../models/Comment');
 const parseValidationErrors = require('../utils/validation');
+
+const articleCompiler = pug.compileFile(`${process.cwd()}/src/reports/article.pug`);
 
 const createArticle = async (req, res) => {
   const articleData = {
@@ -52,9 +59,48 @@ const getArticle = async (req, res) => {
   }
 };
 
+const getArticleReport = async (req, res) => {
+  let htmlArgs;
+  try {
+    const article = await Article.findOne(req.params);
+
+    if (article) {
+      htmlArgs = article;
+      const [user, comments] = await Promise.all([
+        User.findOne({ id: article.author.id }),
+        Comment.find({ articleId: article.id }),
+      ]);
+
+      if (user) {
+        htmlArgs.name = user.name;
+      }
+      if (comments) {
+        htmlArgs.comments = comments;
+      }
+
+      const html = articleCompiler(htmlArgs);
+
+      pdf.create(html).toStream((error, stream) => {
+        if (error) {
+          res.status(422).send({ error });
+        }
+        const relativePath = `${process.cwd()}/public/reports/${article.title}.pdf`;
+
+        stream.pipe(fs.createWriteStream(relativePath));
+        res.status(200).send(`reports/${article.title}.pdf`);
+      });
+    } else {
+      res.status(404).send('Article not found');
+    }
+  } catch (error) {
+    res.status(422).send({ error });
+  }
+};
+
 module.exports = {
   createArticle,
   editArticle,
   getArticles,
   getArticle,
+  getArticleReport,
 };

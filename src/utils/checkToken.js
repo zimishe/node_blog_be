@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken');
 
+const WHITELISTED_URLS = ['/login', '/sign_up', '/sign-s3', '/reports'];
+
 const checkToken = async (req, res, next) => {
   const { authorization } = req.headers;
   const { url } = req;
 
-  if (url === '/login' || url === '/sign_up' || url.startsWith('/sign-s3')) {
+  if (WHITELISTED_URLS.some(item => url.startsWith(item))) {
     next();
   } else if (!authorization) {
     res.status(403).send({ message: 'Auth token is missing' });

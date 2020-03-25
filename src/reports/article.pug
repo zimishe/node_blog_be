@@ -1,0 +1,13 @@
+doctype html
+html
+  head
+    title=title
+  body
+    h1=title
+    p=text
+    img(src=coverImageUrl, alt="some alt")
+    h4=name
+    h5 Comments
+    ul
+      each val in comments
+        li= val.text

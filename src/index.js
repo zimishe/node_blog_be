@@ -1,4 +1,5 @@
 const dotenv = require('dotenv');
+const path = require('path');
 const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -19,7 +20,8 @@ app.use(cors({
   methods: 'GET, PUT, POST, DELETE',
   preflightContinue: false,
 }));
-app.use(express.static('public'));
+
+app.use(express.static(path.join(__dirname, '../public')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
