@@ -18,8 +18,6 @@ const createUser = async (req, res) => {
   };
 
   const user = new User(userData);
-
-  // TODO: get rid of db. usage here
   const userExists = await db.collection('users').findOne({
     email,
   });
