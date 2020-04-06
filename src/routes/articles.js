@@ -1,5 +1,10 @@
 const {
-  createArticle, editArticle, getArticles, getArticle, getArticleReport,
+  createArticle,
+  editArticle,
+  getArticles,
+  getArticle,
+  getArticleReport,
+  getArticlePaymentIntentKey,
 } = require('../controllers/articles');
 
 module.exports = app => {
@@ -8,4 +13,5 @@ module.exports = app => {
   app.get('/articles', getArticles);
   app.get('/articles/:id', getArticle);
   app.get('/articles/:id/report', getArticleReport);
+  app.get('/articles/:id/donate', getArticlePaymentIntentKey);
 };

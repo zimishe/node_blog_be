@@ -1,31 +1,31 @@
-backend - `server/` directory
-front-end - `src/` directory
 
 ## To run:
-`yarn install` to install required packages
-`yarn server` to launch back-end
-`yarn start` to launch front-end
+`npm i` to install required packages
+`npm start` to launch server
 
-## Resources
-For backend used Node v10.16.0 + Express
-For database use MongoDB deployed on Heroku
+### Available endpoints/features
 
-## Available Scripts
+## Articles
+  # POST `/articles` - creates article
+  # GET `/articles` - get all articles
+  # PUT `/articles/:id` - update article with :id
+  # GET `/articles/:id` - get certain article by :id
+  # GET `/articles/:id/report` - get certain article PDF report
 
-In the project directory, you can run:
+## Comments
+  # POST `/articles/:articleId/comments` - add a comment to article with :articleId
+  # GET `/articles/:articleId/comments` - get the list of comments for :articleId
 
-### `yarn start` or `npm start`
+## Users
+  # POST `/sign_up` - register new user
+  # GET `/login` - login user
 
-Runs the frontend app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## S3
+  # GET `/sign-s3` - get pre-signed url for direct AWS S3 file upload
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
-
-### `yarn server` or `npm server`
-
-Launches Node server<br>
-
-### `yarn run build` or `npm run build`
-
-Builds the app for production to the `build` folder.<br>
+## Other
+  # Implemented sending email via nodemailer - `utils/emails.js`
+  # Implemented jwt token authorization - all the routes except certain are protected via token
+  # on GET `/articles/:articleId/comments` implemented pagination
+  # Set up AWS S3 bucket to store public files
+  # DB is up and running on Mongodb Atlas

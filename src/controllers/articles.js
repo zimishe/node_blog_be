@@ -2,6 +2,7 @@ const fs = require('fs');
 const uuidv1 = require('uuid/v1');
 const pug = require('pug');
 const pdf = require('html-pdf');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Article = require('../models/Article');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
@@ -97,10 +98,29 @@ const getArticleReport = async (req, res) => {
   }
 };
 
+const getArticlePaymentIntentKey = async (req, res) => {
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 50,
+      currency: 'usd',
+      // Verify your integration in this guide by including this parameter
+      metadata: { integration_check: 'accept_a_payment' },
+    });
+
+    // eslint-disable-next-line camelcase
+    const { client_secret } = paymentIntent;
+
+    res.status(200).send({ client_secret });
+  } catch (error) {
+    res.status(422).send({ error });
+  }
+};
+
 module.exports = {
   createArticle,
   editArticle,
   getArticles,
   getArticle,
   getArticleReport,
+  getArticlePaymentIntentKey,
 };
