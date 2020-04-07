@@ -1,4 +1,5 @@
 const uuidv1 = require('uuid/v1');
+const wsServer = require('./websockets');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
 const Article = require('../models/Article');
@@ -29,6 +30,9 @@ const createArticleComment = async (req, res) => {
     };
     const comment = new Comment(commentData);
 
+    const targetClient = [...wsServer.clients]
+      .find(({ id }) => id === article.author.id);
+
     comment.save(err => {
       if (err) {
         const { errors } = err;
@@ -36,6 +40,9 @@ const createArticleComment = async (req, res) => {
         res.status(422).send(errorsArray);
       } else {
         res.status(200).send('comment saved successfully');
+        if (targetClient) {
+          targetClient.send(`boi, ${user.name} commented on your post!`);
+        }
       }
     });
   }

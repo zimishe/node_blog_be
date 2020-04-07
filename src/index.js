@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 
 dotenv.config();
+require('./controllers/websockets');
+const routes = require('./routes');
 const { URL } = require('./_config/db');
 const { checkToken } = require('./utils/checkToken');
 
@@ -37,8 +39,7 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
   app.listen(port, () => {
-    // eslint-disable-next-line global-require
-    require('./routes')(app);
+    routes(app);
     console.log('Server is live at ', port);
   });
 });
