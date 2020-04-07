@@ -60,6 +60,22 @@ const getArticle = async (req, res) => {
   }
 };
 
+const searchArticles = async (req, res) => {
+  const { query = {} } = req;
+
+  try {
+    const articles = await Article.find({ $text: { $search: query.text } });
+
+    if (articles) {
+      res.send(articles);
+    } else {
+      res.status(404).send('Articles not found');
+    }
+  } catch (error) {
+    res.status(422).send({ error });
+  }
+};
+
 const getArticleReport = async (req, res) => {
   let htmlArgs;
   try {
@@ -123,4 +139,5 @@ module.exports = {
   getArticle,
   getArticleReport,
   getArticlePaymentIntentKey,
+  searchArticles,
 };
