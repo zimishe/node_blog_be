@@ -30,7 +30,7 @@ const createUser = async (req, res) => {
         const errorsArray = parseValidationErrors(errors);
         res.status(422).send(errorsArray);
       } else {
-        res.status(200).send('user registration succeed');
+        res.status(200).send({ message: 'user registration succeed' });
         await sendEmail(user);
       }
     });
@@ -41,13 +41,14 @@ const loginUser = async (req, res) => {
   const db = mongoose.connection;
   const { password, email } = req.body;
 
-  // TODO: get rid of db. usage here
   const userEntity = await db.collection('users').findOne({
     email,
   });
 
   if (userEntity) {
     dbPasswordHash = userEntity.password;
+  } else {
+    res.status(404).send({ message: 'user not found' });
   }
 
   const match = await bcrypt.compare(password, dbPasswordHash);
@@ -57,7 +58,7 @@ const loginUser = async (req, res) => {
       if (err) {
         res.status(401).send('sorry');
       } else {
-        res.status(200).send({ message: 'logged in successfully', token });
+        res.status(200).send({ id: userEntity.id, name: userEntity.name, token });
       }
     });
   } else {
