@@ -48,7 +48,7 @@ const getArticles = async (req, res) => {
 
 const getArticle = async (req, res) => {
   try {
-    const article = await Article.find(req.params);
+    const article = await Article.findOne(req.params);
 
     if (article) {
       res.send(article);

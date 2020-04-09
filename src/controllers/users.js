@@ -1,13 +1,12 @@
 const bcrypt = require('bcrypt');
 const uuidv1 = require('uuid/v1');
-const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const parseValidationErrors = require('../utils/validation');
-const { sendEmail } = require('../utils/emails');
+const { sendSignupEmail, sendResetPasswordEmail } = require('../utils/emails');
+const { generateResetPasswordToken } = require('../utils/resetPasswordToken');
 
 const createUser = async (req, res) => {
-  const db = mongoose.connection;
   const { password, email, ...rest } = req.body;
 
   const userData = {
@@ -18,7 +17,7 @@ const createUser = async (req, res) => {
   };
 
   const user = new User(userData);
-  const userExists = await db.collection('users').findOne({
+  const userExists = await User.findOne({
     email,
   });
 
@@ -31,17 +30,16 @@ const createUser = async (req, res) => {
         res.status(422).send(errorsArray);
       } else {
         res.status(200).send({ message: 'user registration succeed' });
-        await sendEmail(user);
+        await sendSignupEmail(user);
       }
     });
 };
 
 const loginUser = async (req, res) => {
   let dbPasswordHash = null;
-  const db = mongoose.connection;
   const { password, email } = req.body;
 
-  const userEntity = await db.collection('users').findOne({
+  const userEntity = await User.findOne({
     email,
   });
 
@@ -66,7 +64,57 @@ const loginUser = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const userEntity = await User.findOne({
+    email,
+  });
+
+  if (!userEntity) {
+    res.status(404).send({ message: 'user not found' });
+  }
+
+  try {
+    const token = generateResetPasswordToken(userEntity);
+    const url = `http://localhost:3000/password/reset/${userEntity.id}?token=${token}`;
+
+    await sendResetPasswordEmail(userEntity, url);
+    res.status(200).send({ message: 'Password reset letter was sent' });
+  } catch (err) {
+    res.status(500).send('Error sending email');
+  }
+};
+
+const updatePassword = async (req, res) => {
+  const { userId } = req.params;
+  const { password } = req.body;
+
+  const userEntity = await User.findOne({
+    id: userId,
+  });
+
+  if (!userEntity) {
+    res.status(404).send({ message: 'user not found' });
+  }
+
+  const secret = `${userEntity.password}-${userEntity.createdAt}`;
+  const payload = jwt.decode(req.query.token, secret);
+
+  if (payload.userId === userEntity.id && password) {
+    try {
+      const newPasswordHash = bcrypt.hashSync(password, 5);
+      await User.findOneAndUpdate({ id: userId }, { password: newPasswordHash });
+      res.status(202).send('Password changed');
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  }
+};
+
 module.exports = {
   createUser,
   loginUser,
+  resetPassword,
+  updatePassword,
 };
