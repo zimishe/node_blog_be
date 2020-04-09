@@ -1,8 +1,3 @@
-const dbName = 'node_blog';
-const dbUser = 'admin';
-const dbPassword = 'admin_123';
-
 module.exports = {
-  dbName,
-  URL: `mongodb+srv://${dbUser}:${dbPassword}@cluster0-fqowz.mongodb.net/${dbName}?retryWrites=true&w=majority`,
+  URL: `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-fqowz.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
 };
