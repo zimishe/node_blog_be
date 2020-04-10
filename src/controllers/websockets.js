@@ -3,6 +3,7 @@ const qs = require('qs');
 
 const wsServer = new WebSocket.Server({
   port: 8001,
+  noServer: true,
 });
 
 wsServer.on('connection', (ws, req) => {
