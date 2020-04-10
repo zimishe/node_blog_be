@@ -1,4 +1,6 @@
 const dotenv = require('dotenv');
+const { Server } = require('ws');
+const qs = require('qs');
 const path = require('path');
 const cors = require('cors');
 const express = require('express');
@@ -7,12 +9,12 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 
 dotenv.config();
-require('./controllers/websockets');
 const routes = require('./routes');
 const { URL } = require('./_config/db');
 const { checkToken } = require('./utils/checkToken');
 
 const port = process.env.PORT || 8000;
+let wsServer;
 
 const app = express();
 app.use(cors({
@@ -40,6 +42,22 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
   app.listen(port, () => {
     routes(app);
+
+    wsServer = new Server({
+      server: app,
+      port: 8001,
+    });
+
+    wsServer.on('connection', (ws, req) => {
+      const data = qs.parse(req.url.slice(2, req.url.length));
+      // eslint-disable-next-line no-param-reassign
+      ws.id = data.user_id;
+      ws.send('connected!');
+    });
     console.log('Server is live at ', port);
   });
 });
+
+module.exports = {
+  wsServer,
+};

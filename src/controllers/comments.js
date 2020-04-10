@@ -1,5 +1,5 @@
 const uuidv1 = require('uuid/v1');
-const wsServer = require('./websockets');
+const { wsServer } = require('../index');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
 const Article = require('../models/Article');
