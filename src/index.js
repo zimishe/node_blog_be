@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
-const { Server } = require('ws');
-const qs = require('qs');
+const http = require('http');
+const io = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const express = require('express');
@@ -14,9 +14,21 @@ const { URL } = require('./_config/db');
 const { checkToken } = require('./utils/checkToken');
 
 const port = process.env.PORT || 8000;
-let wsServer;
+const LOGGED_IN_USERS_ROOM = 'logged-in-users';
 
 const app = express();
+const server = http.createServer(app);
+
+const wsServer = io(server);
+// eslint-disable-next-line no-underscore-dangle
+wsServer.engine.generateId = req => req._query.user_id;
+
+wsServer.on('connection', socket => {
+  // eslint-disable-next-line no-param-reassign
+  socket.join(LOGGED_IN_USERS_ROOM);
+  socket.to(LOGGED_IN_USERS_ROOM).send('connected!');
+});
+
 app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Type', 'Authorization'],
@@ -40,20 +52,8 @@ const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
-  app.listen(port, () => {
+  server.listen(port, () => {
     routes(app);
-
-    wsServer = new Server({
-      server: app,
-      port: 8001,
-    });
-
-    wsServer.on('connection', (ws, req) => {
-      const data = qs.parse(req.url.slice(2, req.url.length));
-      // eslint-disable-next-line no-param-reassign
-      ws.id = data.user_id;
-      ws.send('connected!');
-    });
     console.log('Server is live at ', port);
   });
 });
