@@ -40,7 +40,7 @@ const createArticleComment = async (req, res) => {
         try {
           // eslint-disable-next-line global-require
           const { wsServer } = require('../index');
-          wsServer.to(article.author.id).send(`boi, ${user.name} commented on your post!`);
+          wsServer.to(article.author.id).send({ type: 'comment', data: commentData });
         } catch (error) {
           res.status(422).send('unable to send message');
         }
