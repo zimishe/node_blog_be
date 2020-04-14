@@ -6,6 +6,10 @@ const parseValidationErrors = require('../utils/validation');
 const { sendSignupEmail, sendResetPasswordEmail } = require('../utils/emails');
 const { generateResetPasswordToken } = require('../utils/resetPasswordToken');
 
+const BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://fast-scrubland-94933.herokuapp.com'
+  : 'http://localhost:3000';
+
 const createUser = async (req, res) => {
   const { password, email, ...rest } = req.body;
 
@@ -54,7 +58,7 @@ const loginUser = async (req, res) => {
   if (match) {
     jwt.sign({ email, password }, process.env.PRIVATE_KEY, (err, token) => {
       if (err) {
-        res.status(401).send('sorry');
+        res.status(401).send('Wrong password');
       } else {
         res.status(200).send({ id: userEntity.id, name: userEntity.name, token });
       }
@@ -77,7 +81,7 @@ const resetPassword = async (req, res) => {
 
   try {
     const token = generateResetPasswordToken(userEntity);
-    const url = `http://localhost:3000/password/reset/${userEntity.id}?token=${token}`;
+    const url = `${BASE_URL}/password/update/${userEntity.id}?token=${token}`;
 
     await sendResetPasswordEmail(userEntity, url);
     res.status(200).send({ message: 'Password reset letter was sent' });
@@ -88,7 +92,7 @@ const resetPassword = async (req, res) => {
 
 const updatePassword = async (req, res) => {
   const { userId } = req.params;
-  const { password } = req.body;
+  const { password, passwordConfirmation } = req.body;
 
   const userEntity = await User.findOne({
     id: userId,
@@ -98,17 +102,26 @@ const updatePassword = async (req, res) => {
     res.status(404).send({ message: 'user not found' });
   }
 
-  const secret = `${userEntity.password}-${userEntity.createdAt}`;
-  const payload = jwt.decode(req.query.token, secret);
+  if (password !== passwordConfirmation) {
+    res.status(500).send({ message: 'passwords doesn\'t match' });
+  }
 
-  if (payload.userId === userEntity.id && password) {
-    try {
-      const newPasswordHash = bcrypt.hashSync(password, 5);
-      await User.findOneAndUpdate({ id: userId }, { password: newPasswordHash });
-      res.status(202).send('Password changed');
-    } catch (err) {
-      res.status(500).send(err);
+  const secret = `${userEntity.password}-${userEntity.createdAt}`;
+
+  try {
+    const payload = jwt.verify(req.query.token, secret);
+
+    if (payload.userId === userEntity.id && password) {
+      try {
+        const newPasswordHash = bcrypt.hashSync(password, 5);
+        await User.findOneAndUpdate({ id: userId }, { password: newPasswordHash });
+        res.status(202).send('Password updated');
+      } catch (err) {
+        res.status(500).send(err);
+      }
     }
+  } catch (error) {
+    res.status(500).send('token is invalid or expired');
   }
 };
 

@@ -8,6 +8,6 @@ const {
 module.exports = app => {
   app.post('/sign_up', createUser);
   app.post('/login', loginUser);
-  app.post('/reset_password', resetPassword);
-  app.post('/update_password/:userId', updatePassword);
+  app.post('/password/reset', resetPassword);
+  app.post('/password/update/:userId', updatePassword);
 };

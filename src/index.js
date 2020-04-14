@@ -44,6 +44,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(checkToken);
 
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 mongoose.connect(URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

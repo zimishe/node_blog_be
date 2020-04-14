@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const WHITELISTED_URLS = ['/login', '/sign_up', '/sign-s3', '/reports', '/reset_password', '/update_password'];
+const WHITELISTED_URLS = ['/login', '/sign_up', '/sign-s3', '/reports', '/password'];
 
 const checkToken = async (req, res, next) => {
   const { authorization } = req.headers;
