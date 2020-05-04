@@ -7,6 +7,7 @@ aws.config.region = 'us-east-1';
 
 const S3_BUCKET = 'node-lock-test';
 const REPORTS_FOLDER = 'public/reports';
+const executablePath = './node_modules/puppeteer/.local-chromium/mac-737027/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
 
 const articleCompiler = pug.compileFile(`${process.cwd()}/src/reports/article.pug`);
 
@@ -18,8 +19,7 @@ const generatePdf = async htmlArgs => {
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
+      executablePath,
     });
 
     const page = await browser.newPage();
