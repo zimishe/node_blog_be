@@ -1,14 +1,14 @@
-const fs = require('fs');
+// const fs = require('fs');
 const uuidv1 = require('uuid/v1');
-const pug = require('pug');
-const pdf = require('html-pdf');
+const axios = require('axios');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Article = require('../models/Article');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const parseValidationErrors = require('../utils/validation');
+const { generatePdf } = require('../utils/generatePdf');
 
-const articleCompiler = pug.compileFile(`${process.cwd()}/src/reports/article.pug`);
+let MAGIC_COUNTER = 0;
 
 const createArticle = async (req, res) => {
   const articleData = {
@@ -95,17 +95,30 @@ const getArticleReport = async (req, res) => {
         htmlArgs.comments = comments;
       }
 
-      const html = articleCompiler(htmlArgs);
+      try {
+        const generatedBy = (MAGIC_COUNTER % 2) === 0 ? 'regular be' : 'lambda';
+        const response = (MAGIC_COUNTER % 2) === 0
+          ? await generatePdf(htmlArgs)
+          : await axios
+            .post(
+              'https://adoo4cje19.execute-api.us-east-1.amazonaws.com/default/node-test/reports',
+              {
+                title: article.title,
+                text: article.text,
+                coverImageUrl: article.coverImageUrl,
+                comments,
+                name: user.name,
+              },
+            );
 
-      pdf.create(html).toStream((error, stream) => {
-        if (error) {
-          res.status(422).send({ error });
-        }
-        const relativePath = `${process.cwd()}/public/reports/${article.title}.pdf`;
+        MAGIC_COUNTER += 1;
 
-        stream.pipe(fs.createWriteStream(relativePath));
-        res.status(200).send(`reports/${article.title}.pdf`);
-      });
+        console.log('respp', response);
+
+        res.status(200).send({ generatedBy, url: (MAGIC_COUNTER % 2) === 0 ? response.data.Location : response.Location });
+      } catch (e) {
+        console.log('err', e);
+      }
     } else {
       res.status(404).send('Article not found');
     }
