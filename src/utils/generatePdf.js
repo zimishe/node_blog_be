@@ -22,7 +22,7 @@ const generatePdf = async (htmlArgs, res) => {
 
         const s3Params = {
           Bucket: S3_BUCKET,
-          Key: `${REPORTS_FOLDER}/${htmlArgs.title}-${new Date()}.pdf`,
+          Key: `${REPORTS_FOLDER}/${htmlArgs.title}.pdf`,
           Expires: 360,
           ContentType: 'application/pdf',
           ACL: 'public-read',

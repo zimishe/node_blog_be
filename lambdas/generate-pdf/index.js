@@ -12,6 +12,9 @@ exports.handler = async event => {
   let browser = null;
   let result = null;
 
+  /** looks like you should load fonts before launching Chrome instance
+  * otherwise it will fail with some useless error like 'Socket hang up'
+  */
   await chromium.font('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
 
   try {

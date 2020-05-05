@@ -11,7 +11,7 @@ const uploadToS3 = async (body, title) => {
 
   const s3Params = {
     Bucket: S3_BUCKET,
-    Key: `${REPORTS_FOLDER}/${title}-${new Date()}.pdf`,
+    Key: `${REPORTS_FOLDER}/${title}.pdf`,
     Expires: 360,
     ContentType: 'application/pdf',
     ACL: 'public-read',
