@@ -2,21 +2,18 @@
 const uuidv1 = require('uuid/v1');
 const axios = require('axios');
 const aws = require('aws-sdk');
-const pug = require('pug');
-const pdfH = require('html-pdf');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Article = require('../models/Article');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const parseValidationErrors = require('../utils/validation');
+const { generatePdf } = require('../utils/generatePdf');
 
 aws.config.region = 'us-east-1';
 
-const S3_BUCKET = 'node-lock-test';
-const REPORTS_FOLDER = 'public/reports';
+const PDF_LAMBDA_URL = 'https://adoo4cje19.execute-api.us-east-1.amazonaws.com/default/node-test/reports';
 
-const articleCompiler = pug.compileFile(`${process.cwd()}/src/reports/article.pug`);
-
+// created only for testing purposes, to switch between .pdf generation methods in runtime
 let MAGIC_COUNTER = 0;
 
 const createArticle = async (req, res) => {
@@ -97,6 +94,10 @@ const getArticleReport = async (req, res) => {
         Comment.find({ articleId: article.id }),
       ]);
 
+      if (!user) {
+        res.status(404).send({ message: 'user not found' });
+      }
+
       if (user) {
         htmlArgs.name = user.name;
       }
@@ -105,33 +106,12 @@ const getArticleReport = async (req, res) => {
       }
 
       try {
-        const generatedBy = (MAGIC_COUNTER % 2) === 0 ? 'regular be' : 'lambda';
-
         if ((MAGIC_COUNTER % 2) === 0) {
-          const html = articleCompiler(htmlArgs);
-
-          pdfH.create(html)
-            .toStream(async (error, stream) => {
-              const s3 = new aws.S3();
-
-              const s3Params = {
-                Bucket: S3_BUCKET,
-                Key: `${REPORTS_FOLDER}/${htmlArgs.title}-${new Date()}.pdf`,
-                Expires: 360,
-                ContentType: 'application/pdf',
-                ACL: 'public-read',
-                Body: stream,
-              };
-
-              s3.upload(s3Params, (error, data) => {
-                console.log('da', data);
-                res.status(200).send({ generatedBy, url: data.Location });
-              });
-            });
+          await generatePdf(htmlArgs, res);
         } else {
           const response = await axios
             .post(
-              'https://adoo4cje19.execute-api.us-east-1.amazonaws.com/default/node-test/reports',
+              PDF_LAMBDA_URL,
               {
                 title: article.title,
                 text: article.text,
@@ -141,15 +121,12 @@ const getArticleReport = async (req, res) => {
               },
             );
 
-          res.status(200).send({ generatedBy, url: response.data.Location });
+          res.status(200).send({ generatedBy: 'lambda', url: response.data.Location });
         }
 
-
         MAGIC_COUNTER += 1;
-
-        // res.status(200).send({ generatedBy, url: (MAGIC_COUNTER % 2) === 0 ? response.data.Location : response.Location });
       } catch (e) {
-        console.log('err', e);
+        console.error(e);
       }
     } else {
       res.status(404).send('Article not found');

@@ -1,0 +1,14 @@
+{
+  "name": "pdf",
+  "version": "1.0.0",
+  "description": "pdf lambda dependenices",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yevhen",
+  "license": "ISC",
+  "dependencies": {
+    "pug": "^2.0.4"
+  }
+}
